@@ -5,7 +5,7 @@ def solution
   total_calories_by_elf = calorie_list_by_elf.transform_values do |calorie_list|
     calorie_list.sum(&:to_i)
   end
-  total_calories_by_elf.values.max
+  total_calories_by_elf.values.sort.last(3).sum
 end
 
 puts solution
