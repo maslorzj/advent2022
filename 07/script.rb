@@ -1,99 +1,43 @@
 def part1(input)
+  apply_moves(crate_columns(input), moves(input))
 end
-
 def part2(input)
 end
-
 def exercise
-  File.read('input.txt')
+  File.read('input.txt').split("\n")
 end
-
-def get_dir_sizes(input)
-  tree = get_file_tree(input)
-  tree.map { |path, files| files.map { |name, data| puts("name ", name, "data", data) } }
-end
-
-def get_file_tree(input)
-  tree = {}
-  current_path = []
-  commands(input).each do |command_line|
-    if command_line[:command] == "cd"
-      if command_line[:argument] == "/"
-        current_path = []
-      elsif command_line[:argument] == ".."
-        current_path.shift
-      else
-        current_path << command_line[:argument]
-      end
-    end
-
-    if command_line[:command] == "ls"
-      path = current_path.join("/")
-      path = "." if path == ""
-      tree[path] = tree[path].to_a + files_data_from_list(command_line[:result]).to_a
-    end
+def crate_columns(input)
+  crates = []
+  input[0, input.index("") - 1].map do |crate_row|
+    crates_row = []
+    crate_row.chars.each_slice(4) { |crate| crates_row << (crate.grep(/[a-zA-Z]+/) || []) }
+    crates << crates_row
   end
-  tree
+  crates.transpose.map { |column| column.reject(&:empty?) }
 end
-
-def commands(input)
-  input.join("\n").split("$ ").filter_map do |input_and_output|
-    next if input_and_output.empty?
-
-    outputs = input_and_output.split("\n")
-    input = outputs.shift
-
-    command, command_arg = input.split(" ")
-
-    {
-      command: command,
-      argument: command_arg,
-      result: outputs
-    }
+def moves(input)
+  input[input.index("") + 1, example.length].map do |move_translation|
+    moves = move_translation.split(" ").map(&:to_i).select(&:positive?)
+    {count: moves.first, from: moves[1], to: moves.last}
   end
 end
-
-def files_data_from_list(result)
-  result.filter_map do |file_or_dir|
-    next if file_or_dir.start_with?('dir')
-
-    file_info = file_or_dir.split(' ')
-    {file_info.last.to_s => {size: file_info.first}}
-  end
+def apply_moves(crates, moves)
 end
-
 def example
   [
-    "$ cd /",
-    "$ ls",
-    "dir a",
-    "14848514 b.txt",
-    "8504156 c.dat",
-    "dir d",
-    "$ cd a",
-    "$ ls",
-    "dir e",
-    "29116 f",
-    "2557 g",
-    "62596 h.lst",
-    "$ cd e",
-    "$ ls",
-    "584 i",
-    "$ cd ..",
-    "$ cd ..",
-    "$ cd d",
-    "$ ls",
-    "4060174 j",
-    "8033020 d.log",
-    "5626152 d.ext",
-    "7214296 k",
+    "    [D]    ",
+    "[N] [C]    ",
+    "[Z] [M] [P]",
+    " 1   2   3 ",
+    "",
+    "move 1 from 2 to 1",
+    "move 3 from 1 to 3",
+    "move 2 from 2 to 1",
+    "move 1 from 1 to 2",
   ]
 end
-
-puts commands(example)
-puts get_file_tree(example)
-puts get_dir_sizes(example)
+puts moves(example).to_s
 # puts part1(example)
 # puts part1(exercise)
-# puts part2(example)
-# puts part2(exercise)
+puts part2(example)
+puts part2(exercise)
